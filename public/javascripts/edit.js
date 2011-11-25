@@ -1,5 +1,5 @@
 /**
-  * ±à¼­¾àÀëjsÊ¾Àı
+  * ç¼–è¾‘è·ç¦»jsç¤ºä¾‹
   */
 (function(exports){
   var words = {};
@@ -60,7 +60,7 @@
   var check = function(word){
     var res = [], edits, depth = 2;
     if(word <= 2 || word in words){
-      res = word;
+      res.push(word);
     }else{
       res = know_edit(word, words);
       if(!res.length){

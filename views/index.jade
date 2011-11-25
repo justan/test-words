@@ -1,5 +1,6 @@
 h1= title
-input(type='text')
-button Go
+input(type='text', id='word')
+button(onclick='$("#show").html(edit.check($("#word").val()).join(", "))') Go
+div#show
 script(src='javascripts/edit.js')
 script(src='javascripts/main.js')
