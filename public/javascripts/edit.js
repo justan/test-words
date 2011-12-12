@@ -93,30 +93,69 @@
           return cur['$'];
         }
       },
-      'succinct': (function(){
+      //TODO(http://stevehanov.ca/blog/index.php?id=120)
+      succinct: (function(){
         var BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',
+          fix = ['', '0', '00', '000', '0000', '00000'],
           encode = function(trie){
-            var cur = trie, key, i, code = '', map = [cur], map_tmp;
+            var key, bits = '10', dic = '', map = [trie], next, n = 0;
             while(map.length){
-              map_tmp = []
+              next = [];
               map.forEach(function(cur){
-                i = 0;
+                var keybit;
                 for(key in cur){
-                  key == '$' || tmp.push(cur[key])
-                  i++;
+                  if(key !== '$'){
+                    next.push(cur[key]);
+                    bits += '1';
+                    keybit = (key.charCodeAt(0) - 'a'.charCodeAt(0)).toString(2);
+                    keybit = fix[5 - keybit.length] + keybit;
+                    dic = dic + (cur[key] && cur[key]['$'] ? '1' : '0') + keybit;
+                  }
                 }
-                code += i.toString(2);
+                n++;
+                bits += '0';
               });
-              map = tmp;
+              map = next;
+            }
+            bits = bits + '111111' + dic;
+            return {
+              len: n,
+              //dic: dic,//bit.encode(dic),//
+              tri: bit.encode(bits)//bits//
+            };
+          },
+          bit = {
+            encode: function(bits, lenth){
+              bits = bits + '', W = 6;
+              var strs = '', i = 0, n = Math.ceil(bits.length / W), _x = bits.length % W;
+              bits = _x ? (bits + fix[6 - _x]) : bits;
+              for(; i < n; i++){
+                strs += BASE64[parseInt(bits.substring(i*W, (i + 1)*W), 2)];
+              }
+              return strs;
+            },
+            decode: function(str, len){
+              var bits = '', letter;
+              for(var i = 0, l = str.length; i < l; i++){
+                letter = BASE64.indexOf(str[i]).toString(2);
+                letter = bits.length >= len ? (fix[6 - letter.length] + letter) : letter;
+                bits += letter;
+              }
+              return bits;
             }
           },
-          decode = function(str){},
-          rank = function(){},
-          select = function(){};
+          
+          rank = function(x, bits){
+            
+          },
+          select = function(y, bits){
+            
+          };
+        decode = bit.decode;
         var ret = {
           init: function(strs){
             var trie = {};
-            strs.forEach(function(word){
+            strs.sort().forEach(function(word){
               var i = 0, l = word.length, cur = trie;
               for(; i < l; i++){
                 if(cur[word[i]]){
@@ -127,10 +166,11 @@
               }
               cur['$'] = 1;
             });
-            return trie;
+            return encode(trie);
           },
           has: function(word, data){
-            var i = 0, l = word.length, cur = data;
+            var i = 0, l = word.length, cur = data,
+              bits = cur.tri;
             for(; i < l; i++){
               cur = cur[word[i]];
               if(!cur){
